@@ -1,0 +1,14 @@
+{
+  "name": "matlab-neural-network",
+  "version": "1.0.0",
+  "description": "A simple implementation of a neural network in MATLAB.",
+  "main": "src/neural_network.m",
+  "scripts": {
+    "train": "matlab -batch 'train'",
+    "test": "matlab -batch 'test_neural_network'"
+  },
+  "dependencies": {},
+  "devDependencies": {},
+  "author": "Your Name",
+  "license": "MIT"
+}
