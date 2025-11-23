@@ -1,14 +1,41 @@
 {
-  "name": "matlab-neural-network",
-  "version": "1.0.0",
-  "description": "A simple implementation of a neural network in MATLAB.",
-  "main": "src/neural_network.m",
+  "name": "matlab-car-price-prediction",
+  "version": "2.0.0",
+  "description": "Production-ready neural network for car price prediction in MATLAB. Built from scratch using real-world data, with comprehensive preprocessing and evaluation utilities.",
+  "main": "train_car_price_model.m",
   "scripts": {
-    "train": "matlab -batch 'train'",
-    "test": "matlab -batch 'test_neural_network'"
+    "train": "matlab -batch 'run(\"train_car_price_model.m\")'"
+  },
+  "keywords": [
+    "matlab",
+    "neural-network",
+    "machine-learning",
+    "regression",
+    "car-price-prediction",
+    "price-prediction",
+    "backpropagation",
+    "gradient-descent",
+    "from-scratch",
+    "real-world-data"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/matlab-neural-network.git"
+  },
+  "bugs": {
+    "url": "https://github.com/yourusername/matlab-neural-network/issues"
+  },
+  "homepage": "https://github.com/yourusername/matlab-neural-network#readme",
+  "author": "Your Name <your.email@example.com>",
+  "contributors": [],
+  "license": "MIT",
+  "engines": {
+    "matlab": ">=R2019b"
   },
   "dependencies": {},
   "devDependencies": {},
-  "author": "Your Name",
-  "license": "MIT"
+  "matlab": {
+    "toolboxes": [],
+    "requirements": "MATLAB R2019b or later"
+  }
 }

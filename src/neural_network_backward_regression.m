@@ -1,13 +1,13 @@
-function gradients = neural_network_backward(model, X, y, predictions, cache)
-    % NEURAL_NETWORK_BACKWARD - Backward propagation for classification
+function gradients = neural_network_backward_regression(model, X, y, predictions, cache)
+    % NEURAL_NETWORK_BACKWARD_REGRESSION - Backward propagation for regression
     %
     % Syntax:
-    %   gradients = neural_network_backward(model, X, y, predictions, cache)
+    %   gradients = neural_network_backward_regression(model, X, y, predictions, cache)
     %
     % Inputs:
     %   model       - Neural network model structure
     %   X           - Input data (features x samples)
-    %   y           - True labels (output_size x samples, one-hot encoded)
+    %   y           - True target values (output_size x samples)
     %   predictions - Network predictions from forward pass
     %   cache       - Cached values from forward pass
     %
@@ -16,11 +16,15 @@ function gradients = neural_network_backward(model, X, y, predictions, cache)
     %               .weights - Gradient of weights
     %               .biases  - Gradient of biases
     %
-    % See also: NEURAL_NETWORK_FORWARD, TRAIN
+    % Notes:
+    %   Uses MSE loss: L = (1/2m) * sum((predictions - y)^2)
+    %   Gradient: dL/dZ = predictions - y
+    %
+    % See also: NEURAL_NETWORK_FORWARD, TRAIN_REGRESSION
     
     % Validate inputs
     if ~isstruct(model) || ~isfield(model, 'layers')
-        error('neural_network_backward:InvalidModel', 'Model must be a valid structure');
+        error('neural_network_backward_regression:InvalidModel', 'Model must be a valid structure');
     end
     
     % Number of samples
@@ -30,7 +34,7 @@ function gradients = neural_network_backward(model, X, y, predictions, cache)
     gradients = cell(length(model.layers), 1);
     
     % Output layer gradient
-    % For softmax + cross-entropy: dL/dZ = predictions - targets
+    % For MSE loss: dL/dZ = predictions - targets
     dZ = predictions - y;
     
     % Get previous layer activation

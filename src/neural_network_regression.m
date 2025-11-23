@@ -1,46 +1,43 @@
-function model = neural_network(input_size, hidden_size, output_size, varargin)
-    % NEURAL_NETWORK - Initialize a neural network for classification
+function model = neural_network_regression(input_size, hidden_size, output_size, varargin)
+    % NEURAL_NETWORK_REGRESSION - Initialize a neural network for regression
     %
     % Syntax:
-    %   model = neural_network(input_size, hidden_size, output_size)
-    %   model = neural_network(input_size, hidden_size, output_size, 'ParamName', ParamValue, ...)
+    %   model = neural_network_regression(input_size, hidden_size, output_size)
+    %   model = neural_network_regression(input_size, hidden_size, output_size, 'ParamName', ParamValue, ...)
     %
     % Inputs:
     %   input_size  - Number of input features
-    %   hidden_size - Number of neurons in the hidden layer
-    %   output_size - Number of output classes
+    %   hidden_size - Number of neurons in the hidden layer (can be array for multiple layers)
+    %   output_size - Number of output values (typically 1 for regression)
     %
     % Optional Parameters (Name-Value pairs):
     %   'activation'     - Activation function for hidden layer (default: 'relu')
     %   'init_method'    - Weight initialization method: 'xavier', 'he', 'normal' (default: 'he')
-    %   'output_activation' - Output activation function (default: 'softmax')
     %
     % Outputs:
     %   model - Initialized neural network model structure
     %
     % Examples:
-    %   % Create a simple network
-    %   model = neural_network(10, 64, 3);
+    %   % Create a simple regression network
+    %   model = neural_network_regression(10, 64, 1);
     %
     %   % Create with custom activation
-    %   model = neural_network(10, 64, 3, 'activation', 'tanh');
+    %   model = neural_network_regression(10, 64, 1, 'activation', 'tanh');
     %
-    % See also: NEURAL_NETWORK_REGRESSION, TRAIN, PREDICT
+    % See also: NEURAL_NETWORK, TRAIN_REGRESSION, PREDICT_REGRESSION
     
     % Parse optional inputs
     p = inputParser;
     addOptional(p, 'activation', 'relu');
     addOptional(p, 'init_method', 'he');
-    addOptional(p, 'output_activation', 'softmax');
     parse(p, varargin{:});
     
     activation = p.Results.activation;
     init_method = p.Results.init_method;
-    output_activation = p.Results.output_activation;
     
     % Validate inputs
-    if input_size < 1 || hidden_size < 1 || output_size < 1
-        error('neural_network:InvalidSize', 'All sizes must be positive integers');
+    if input_size < 1 || any(hidden_size < 1) || output_size < 1
+        error('neural_network_regression:InvalidSize', 'All sizes must be positive integers');
     end
     
     % Initialize layers
@@ -54,12 +51,12 @@ function model = neural_network(input_size, hidden_size, output_size, varargin)
     layer1.activation_derivative = @(x) activation_functions([activation '_derivative'], x);
     model.layers{1} = layer1;
     
-    % Output layer
+    % Output layer (linear for regression)
     layer2 = struct();
-    layer2.weights = initialize_weights(output_size, hidden_size, 'xavier', output_activation);
+    layer2.weights = initialize_weights(output_size, hidden_size, 'xavier', 'linear');
     layer2.biases = zeros(output_size, 1);
-    layer2.activation_function = @(x) activation_functions(output_activation, x);
-    layer2.activation_derivative = @(x) activation_functions([output_activation '_derivative'], x);
+    layer2.activation_function = @(x) x;  % Linear activation
+    layer2.activation_derivative = @(x) ones(size(x));  % Derivative of linear is 1
     model.layers{2} = layer2;
 end
 

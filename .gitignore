@@ -1,0 +1,101 @@
+# MATLAB specific files
+*.asv
+*.m~
+*.autosave
+*.mlx~
+slprj/
+*.slxc
+*.mex*
+*.p
+*.profview
+resources/project/
+
+# MATLAB App Designer
+*.mlapp.autosave
+*.mlappinstall
+*.mltbx
+
+# Generated files
+*.fig
+*.mat
+!data/*.mat
+!models/saved_model.mat
+
+# OS specific files
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# IDE specific files
+.vscode/
+.idea/
+*.sublime-*
+.project
+.settings/
+
+# Compiled files
+*.o
+*.obj
+*.dll
+*.exe
+
+# Logs
+*.log
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+*.bak
+*~
+
+# Node modules (if using npm for any reason)
+node_modules/
+
+# Python cache (if using MATLAB with Python)
+__pycache__/
+*.py[cod]
+*$py.class
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# Environment
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Documentation build
+docs/_build/
+docs/.doctrees/
+
+# Testing
+.coverage
+.pytest_cache/
+htmlcov/
+
+# Package files
+*.zip
+*.tar.gz
+*.rar
+
