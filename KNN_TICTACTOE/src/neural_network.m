@@ -1,14 +1,14 @@
 function model = neural_network(input_size, hidden_size, output_size, varargin)
-    % NEURAL_NETWORK - Initialize a neural network for classification
+    % NEURAL_NETWORK - Initialize a neural network for Tic Tac Toe
     %
     % Syntax:
     %   model = neural_network(input_size, hidden_size, output_size)
     %   model = neural_network(input_size, hidden_size, output_size, 'ParamName', ParamValue, ...)
     %
     % Inputs:
-    %   input_size  - Number of input features
+    %   input_size  - Number of input features (9 for Tic Tac Toe board)
     %   hidden_size - Number of neurons in the hidden layer
-    %   output_size - Number of output classes
+    %   output_size - Number of output classes (9 for 9 possible moves)
     %
     % Optional Parameters (Name-Value pairs):
     %   'activation'     - Activation function for hidden layer (default: 'relu')
@@ -18,7 +18,16 @@ function model = neural_network(input_size, hidden_size, output_size, varargin)
     % Outputs:
     %   model - Initialized neural network model structure
     %
-    % See also: TRAIN_TICTACTOE, PREDICT_TICTACTOE
+    % Examples:
+    %   % Create a network for Tic Tac Toe
+    %   model = neural_network(9, 64, 9);
+    %
+    % See also: TRAIN, PREDICT
+    
+    % Add path to activation functions
+    if ~exist('activation_functions', 'file')
+        addpath(fullfile(fileparts(mfilename('fullpath')), '..', 'NN_Car_Prices', 'src', 'utils'));
+    end
     
     % Parse optional inputs
     p = inputParser;

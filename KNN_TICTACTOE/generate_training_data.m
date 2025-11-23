@@ -1,118 +1,90 @@
-function [X, y] = generate_training_data(num_games, move_generator_strategy)
-    % Add utils path - get function directory
-    func_dir = fileparts(mfilename('fullpath'));
-    addpath(fullfile(func_dir, 'utils'));
+function [X, y] = generate_training_data(num_games, use_strategy)
     % GENERATE_TRAINING_DATA - Generate training data by playing Tic Tac Toe games
     %
     % Syntax:
-    %   [X, y] = generate_training_data(num_games, move_generator_strategy)
+    %   [X, y] = generate_training_data(num_games)
+    %   [X, y] = generate_training_data(num_games, use_strategy)
     %
     % Inputs:
-    %   num_games              - Number of games to generate
-    %   move_generator_strategy - Strategy for move generator: 'optimal', 'random', etc.
+    %   num_games     - Number of games to play for training data
+    %   use_strategy  - (Optional) If true, use Cleve Moler's strategy for both players
+    %                   If false, use random moves for one player (default: true)
     %
     % Outputs:
-    %   X - Training features (samples x 9) - board states
-    %   y - Training labels (samples x 9) - one-hot encoded moves
+    %   X - Training features (samples x 9), board states as vectors
+    %   y - Training labels (samples x 9), one-hot encoded moves
     %
-    % This function plays games using the move generator and collects
-    % board states with their corresponding optimal moves as training data.
+    % Each game generates multiple training samples (one per move)
     
-    if nargin < 2
-        move_generator_strategy = 'optimal';
+    % Add paths
+    if ~exist('board_to_vector', 'file')
+        addpath(fullfile(fileparts(mfilename('fullpath')), 'utils'));
+    end
+    if ~exist('move_generator', 'file')
+        addpath(fullfile(fileparts(mfilename('fullpath'))));
     end
     
-    fprintf('Generating training data from %d games...\n', num_games);
+    if nargin < 2
+        use_strategy = true;
+    end
     
     X = [];
     y = [];
     
+    fprintf('Generating training data from %d games...\n', num_games);
+    
     for game = 1:num_games
-        % Initialize game
-        board = zeros(3, 3);
-        current_player = 1;  % X starts
+        if mod(game, 100) == 0
+            fprintf('  Game %d/%d\n', game, num_games);
+        end
         
-        % Play game
+        % Initialize empty board
+        board = zeros(3, 3);
+        current_player = 1;  % Player 1 (X) starts
+        
+        % Play until game ends
         while true
+            % Check for winner or draw
+            winner = check_winner(board);
+            if winner ~= 0
+                break
+            end
+            
             % Get valid moves
-            valid_moves = get_valid_moves(board);
-            
-            if isempty(valid_moves)
-                break;
+            [valid_rows, valid_cols] = get_valid_moves(board);
+            if isempty(valid_rows)
+                break
             end
             
-            % Ensure valid_moves is a row vector
-            valid_moves = valid_moves(:)';
-            
-            % Store board state before calling move_generator (safety check)
-            board_before = board;
-            
-            % Generate move using move generator
-            move = move_generator(board, current_player, move_generator_strategy);
-            
-            % Verify board hasn't changed (it shouldn't, but check anyway)
-            if ~isequal(board, board_before)
-                warning('Board changed during move generation, skipping this game');
-                break;
+            % Generate move
+            if use_strategy || current_player == 1
+                % Use strategy for player 1, or for both if use_strategy is true
+                [i, j] = move_generator(board, current_player);
+            else
+                % Random move for player 2 if not using strategy
+                move_idx = ceil(rand * length(valid_rows));
+                i = valid_rows(move_idx);
+                j = valid_cols(move_idx);
             end
-            
-            % Validate move before proceeding - double check it's valid
-            if ~isscalar(move) || move < 1 || move > 9
-                warning('Invalid move %d generated (not scalar or out of range), skipping this game', move);
-                break;
-            end
-            
-            % Re-compute valid_moves to ensure we have the latest state
-            valid_moves_current = [];
-            for pos = 1:9
-                row = floor((pos - 1) / 3) + 1;
-                col = mod(pos - 1, 3) + 1;
-                if board(row, col) == 0
-                    valid_moves_current = [valid_moves_current, pos];
-                end
-            end
-            
-            if ~ismember(move, valid_moves_current)
-                warning('Move %d not in valid moves, skipping this game', move);
-                break;
-            end
-            
-            % Final check: ensure the position is actually empty
-            row = floor((move - 1) / 3) + 1;
-            col = mod(move - 1, 3) + 1;
-            if board(row, col) ~= 0
-                warning('Position %d is already occupied, skipping this game', move);
-                break;
-            end
-            
-            % Convert board to input vector (from current player's perspective)
-            board_vector = board_to_vector(board, current_player);
-            
-            % Create one-hot encoded label for the move
-            move_label = zeros(1, 9);
-            move_label(move) = 1;
             
             % Store training sample
-            X = [X; board_vector];
-            y = [y; move_label];
+            board_vector = board_to_vector(board);
+            X = [X; board_vector'];
+            
+            % Create one-hot encoded move (position in flattened board)
+            move_vector = zeros(1, 9);
+            move_idx = (i - 1) * 3 + j;  % Convert (i,j) to linear index
+            move_vector(move_idx) = 1;
+            y = [y; move_vector];
             
             % Make the move
-            [board, winner, game_over] = tictactoe_game(board, move, current_player);
-            
-            if game_over
-                break;
-            end
+            board(i, j) = current_player;
             
             % Switch player
             current_player = -current_player;
         end
-        
-        % Progress indicator
-        if mod(game, max(1, floor(num_games/10))) == 0
-            fprintf('  Progress: %d/%d games (%.1f%%)\n', game, num_games, 100*game/num_games);
-        end
     end
     
-    fprintf('Generated %d training samples from %d games\n', size(X, 1), num_games);
+    fprintf('Generated %d training samples\n', size(X, 1));
 end
 

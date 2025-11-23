@@ -1,90 +1,98 @@
-function evaluate_model(model, num_games)
-    % Add paths - get function directory
-    func_dir = fileparts(mfilename('fullpath'));
-    addpath(fullfile(func_dir, 'src'));
-    addpath(fullfile(func_dir, 'utils'));
-    % EVALUATE_MODEL - Evaluate neural network performance against move generator
-    %
-    % Syntax:
-    %   evaluate_model(model, num_games)
-    %
-    % Inputs:
-    %   model     - Trained neural network model (optional, loads from file if not provided)
-    %   num_games - Number of games to play for evaluation (default: 100)
-    %
-    % This function plays games between the neural network and the move generator
-    % and reports win/loss/draw statistics.
-    
-    % Load model if not provided
-    if nargin < 1 || isempty(model)
-        if exist('models/tictactoe_model.mat', 'file')
-            load('models/tictactoe_model.mat', 'model');
-        else
-            error('evaluate_model:NoModel', ...
-                'No model provided and models/tictactoe_model.mat not found.');
-        end
-    end
-    
-    if nargin < 2
-        num_games = 100;
-    end
-    
-    fprintf('=========================================\n');
-    fprintf('Evaluating Neural Network Model\n');
-    fprintf('=========================================\n\n');
-    fprintf('Playing %d games against optimal move generator...\n\n', num_games);
-    
-    nn_wins = 0;
-    opponent_wins = 0;
-    draws = 0;
-    
-    for game = 1:num_games
-        board = zeros(3, 3);
-        current_player = 1;  % NN plays as X
-        
-        while true
-            valid_moves = get_valid_moves(board);
-            if isempty(valid_moves)
-                draws = draws + 1;
-                break;
-            end
-            
-            if current_player == 1
-                % Neural network plays
-                move = get_best_move(model, board, current_player);
-            else
-                % Opponent uses move generator
-                move = move_generator(board, current_player, 'optimal');
-            end
-            
-            [board, winner, game_over] = tictactoe_game(board, move, current_player);
-            
-            if game_over
-                if winner == 1
-                    nn_wins = nn_wins + 1;
-                elseif winner == -1
-                    opponent_wins = opponent_wins + 1;
-                else
-                    draws = draws + 1;
-                end
-                break;
-            end
-            
-            current_player = -current_player;
-        end
-        
-        % Progress indicator
-        if mod(game, max(1, floor(num_games/10))) == 0
-            fprintf('  Progress: %d/%d games\n', game, num_games);
-        end
-    end
-    
-    fprintf('\n=========================================\n');
-    fprintf('Evaluation Results\n');
-    fprintf('=========================================\n');
-    fprintf('Neural Network Wins:  %d (%.1f%%)\n', nn_wins, 100*nn_wins/num_games);
-    fprintf('Opponent Wins:        %d (%.1f%%)\n', opponent_wins, 100*opponent_wins/num_games);
-    fprintf('Draws:                %d (%.1f%%)\n', draws, 100*draws/num_games);
-    fprintf('=========================================\n\n');
+% EVALUATE_MODEL - Evaluate the trained Tic Tac Toe neural network
+%
+% This script evaluates the model by:
+%   1. Playing games against Cleve Moler's strategy
+%   2. Comparing performance
+%
+% Usage:
+%   evaluate_model
+
+% Add paths
+addpath(fullfile(fileparts(mfilename('fullpath')), 'utils'));
+addpath(fullfile(fileparts(mfilename('fullpath')), 'src'));
+if ~exist('move_generator', 'file')
+    addpath(fullfile(fileparts(mfilename('fullpath'))));
 end
+
+% Load trained model
+fprintf('Loading trained model...\n');
+if ~exist('models/tictactoe_model.mat', 'file')
+    error('Model not found. Please run train_tictactoe_model.m first.');
+end
+
+load('models/tictactoe_model.mat', 'model');
+
+% Configuration
+num_test_games = 100;
+
+fprintf('=== Evaluating Tic Tac Toe Neural Network ===\n\n');
+fprintf('Playing %d games against Cleve Moler strategy...\n', num_test_games);
+
+results = struct();
+results.nn_wins = 0;
+results.strategy_wins = 0;
+results.draws = 0;
+
+for game = 1:num_test_games
+    if mod(game, 20) == 0
+        fprintf('  Game %d/%d\n', game, num_test_games);
+    end
+    
+    % Initialize board
+    board = zeros(3, 3);
+    current_player = 1;  % NN plays as player 1 (X)
+    
+    % Play game
+    while true
+        % Check for winner
+        winner = check_winner(board);
+        if winner ~= 0
+            if winner == 1
+                results.nn_wins = results.nn_wins + 1;
+            elseif winner == -1
+                results.strategy_wins = results.strategy_wins + 1;
+            else
+                results.draws = results.draws + 1;
+            end
+            break
+        end
+        
+        % Check if board is full
+        if is_board_full(board)
+            results.draws = results.draws + 1;
+            break
+        end
+        
+        % Make move
+        if current_player == 1
+            % Neural network's turn
+            [i, j] = predict_tictactoe(model, board);
+            if isempty(i)
+                % No valid move, game ends in draw
+                results.draws = results.draws + 1;
+                break
+            end
+        else
+            % Strategy's turn (Cleve Moler)
+            [i, j] = move_generator(board, current_player);
+            if isempty(i)
+                % No valid move, game ends in draw
+                results.draws = results.draws + 1;
+                break
+            end
+        end
+        
+        board(i, j) = current_player;
+        current_player = -current_player;
+    end
+end
+
+% Print results
+fprintf('\n=== Evaluation Results ===\n');
+fprintf('Neural Network Wins: %d (%.1f%%)\n', results.nn_wins, ...
+    100 * results.nn_wins / num_test_games);
+fprintf('Strategy Wins: %d (%.1f%%)\n', results.strategy_wins, ...
+    100 * results.strategy_wins / num_test_games);
+fprintf('Draws: %d (%.1f%%)\n', results.draws, ...
+    100 * results.draws / num_test_games);
 

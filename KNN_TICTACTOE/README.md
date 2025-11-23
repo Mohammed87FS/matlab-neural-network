@@ -1,119 +1,94 @@
 # Tic Tac Toe Neural Network
 
-Ein künstliches neuronales Netzwerk (KNN) zum Spielen von Tic Tac Toe, trainiert mit einem Zuggenerator basierend auf Cleve Molers Strategie.
+Ein künstliches neuronales Netzwerk zum Spielen von Tic Tac Toe, trainiert mit Cleve Molers Zuggenerator-Strategie.
 
 ## Übersicht
 
-Dieses Projekt implementiert ein neuronales Netzwerk, das Tic Tac Toe spielen lernt. Das Netzwerk wird mit Trainingsdaten trainiert, die von einem optimalen Zuggenerator generiert werden (inspiriert von Cleve Molers Tic Tac Toe Implementierung).
+Dieses Projekt implementiert ein neuronales Netzwerk, das Tic Tac Toe spielen kann. Das Modell wird mit Trainingsdaten trainiert, die durch Spiele gegen Cleve Molers Strategie generiert werden.
+
+## Cleve Molers Strategie
+
+Die Strategie basiert auf Cleve Molers "TicTacToe Magic" (Chapter 11):
+1. Wenn möglich, einen Gewinnzug machen
+2. Wenn nötig, einen Gewinnzug des Gegners blockieren
+3. Andernfalls einen zufälligen leeren Platz wählen
 
 ## Projektstruktur
 
 ```
 KNN_TICTACTOE/
-├── src/                          # Neural Network Implementierung
-│   ├── neural_network.m          # Netzwerk-Initialisierung
-│   ├── neural_network_forward.m  # Forward Propagation
-│   ├── neural_network_backward.m # Backward Propagation
-│   └── activation_functions.m    # Aktivierungsfunktionen
-├── utils/                        # Hilfsfunktionen
-│   └── game_utils.m             # Spiel-Hilfsfunktionen
-├── tictactoe_game.m             # Spiel-Engine
-├── move_generator.m             # Zuggenerator (Cleve Moler Strategie)
-├── generate_training_data.m     # Trainingsdaten-Generator
-├── train_tictactoe.m            # Training-Funktion
-├── predict_tictactoe.m          # Vorhersage-Funktion
-├── train_tictactoe_model.m      # Haupt-Trainingsskript
-├── play_tictactoe.m             # Interaktives Spiel
-├── evaluate_model.m             # Modell-Evaluierung
-└── README.md                    # Diese Datei
+├── utils/
+│   ├── board_to_vector.m      - Konvertiert Brett in Feature-Vektor
+│   ├── check_winner.m          - Prüft auf Gewinner
+│   ├── display_board.m         - Zeigt das Brett an
+│   ├── get_valid_moves.m       - Findet gültige Züge
+│   └── is_board_full.m         - Prüft ob Brett voll ist
+├── src/
+│   ├── neural_network.m       - Netzwerk-Initialisierung
+│   ├── neural_network_forward.m - Forward Propagation
+│   ├── neural_network_backward.m - Backward Propagation
+│   ├── train.m                 - Training-Funktion
+│   └── predict.m               - Vorhersage-Funktion
+├── move_generator.m            - Cleve Molers Zuggenerator
+├── generate_training_data.m    - Generiert Trainingsdaten
+├── train_tictactoe_model.m    - Haupt-Trainingsskript
+├── predict_tictactoe.m         - Vorhersage für ein Brett
+├── evaluate_model.m            - Evaluierung des Modells
+├── play_tictactoe.m            - Interaktives Spiel
+└── README.md                   - Diese Datei
 ```
 
-## Installation und Verwendung
+## Verwendung
 
-### 1. Training des Modells
-
-Führen Sie das Trainingsskript aus:
+### 1. Modell trainieren
 
 ```matlab
 train_tictactoe_model
 ```
 
 Dieses Skript:
-- Generiert Trainingsdaten aus 10.000 Spielen
-- Initialisiert ein neuronales Netzwerk (9 Eingänge → 64 versteckte Neuronen → 9 Ausgänge)
-- Trainiert das Modell mit den generierten Daten
+- Generiert Trainingsdaten durch Spiele mit Cleve Molers Strategie
+- Erstellt und trainiert ein neuronales Netzwerk
 - Speichert das trainierte Modell in `models/tictactoe_model.mat`
 
-### 2. Spielen gegen das neuronale Netzwerk
-
-```matlab
-play_tictactoe
-```
-
-Oder mit einem geladenen Modell:
-
-```matlab
-load('models/tictactoe_model.mat', 'model');
-play_tictactoe(model);
-```
-
-### 3. Modell-Evaluierung
-
-Spielen Sie das Modell gegen den optimalen Zuggenerator:
+### 2. Modell evaluieren
 
 ```matlab
 evaluate_model
 ```
 
-Oder mit einem geladenen Modell:
+Spielt 100 Spiele gegen Cleve Molers Strategie und zeigt die Ergebnisse.
+
+### 3. Gegen das Modell spielen
 
 ```matlab
-load('models/tictactoe_model.mat', 'model');
-evaluate_model(model, 100);  % 100 Spiele
-```
-
-## Architektur
-
-### Neural Network
-- **Eingang**: 9 Werte (Brettzustand: 1 für X, -1 für O, 0 für leer)
-- **Versteckte Schicht**: 64 Neuronen mit ReLU-Aktivierung
-- **Ausgang**: 9 Werte (Wahrscheinlichkeiten für jeden möglichen Zug, Softmax)
-
-### Zuggenerator
-
-Der Zuggenerator implementiert Cleve Molers optimale Strategie:
-1. Gewinne, wenn möglich
-2. Blockiere den Gegner, wenn er gewinnen kann
-3. Nimm das Zentrum, wenn verfügbar
-4. Nimm eine Ecke, wenn verfügbar
-5. Nimm eine Kante, wenn verfügbar
-6. Zufälliger Zug (falls nichts anderes möglich)
-
-## Trainingsdaten
-
-Die Trainingsdaten werden generiert, indem:
-- Viele Spiele mit dem optimalen Zuggenerator gespielt werden
-- Jeder Brettzustand mit dem entsprechenden optimalen Zug gespeichert wird
-- Das Netzwerk lernt, die optimalen Züge vorherzusagen
-
-## Beispiel
-
-```matlab
-% Training
-train_tictactoe_model
-
-% Spielen
 play_tictactoe
-
-% Evaluierung
-evaluate_model
 ```
+
+Startet ein interaktives Spiel gegen das trainierte neuronale Netzwerk.
+
+## Brett-Repräsentation
+
+Das Brett wird als 3x3 Matrix dargestellt:
+- `+1` = Spieler 1 (X)
+- `-1` = Spieler 2 (O)
+- `0` = leer
+
+## Netzwerk-Architektur
+
+- **Input**: 9 Features (flattened board state)
+- **Hidden Layer**: 128 Neuronen (konfigurierbar)
+- **Output**: 9 Klassen (eine für jede mögliche Position)
+- **Aktivierungsfunktion**: ReLU (Hidden), Softmax (Output)
+- **Loss**: Cross-Entropy
+
+## Abhängigkeiten
+
+Das Projekt nutzt die Aktivierungsfunktionen aus dem `NN_Car_Prices` Projekt:
+- `activation_functions.m`
 
 ## Referenzen
 
-- Cleve Moler's Tic Tac Toe: https://www.mathworks.com/content/dam/mathworks/mathworksdot-com/moler/exm/chapters/tictactoe.pdf
-
-## Lizenz
-
-Dieses Projekt ist für Bildungszwecke erstellt.
+- Cleve Moler: "Experiments in MATLAB", Chapter 11 - TicTacToe Magic
+- https://www.mathworks.com/content/dam/mathworks/mathworksdot-com/moler/exm/chapters/tictactoe.pdf
 

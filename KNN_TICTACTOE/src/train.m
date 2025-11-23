@@ -1,12 +1,12 @@
-function [model, history] = train_tictactoe(X, y, model, options)
-    % TRAIN_TICTACTOE - Train a neural network for Tic Tac Toe
+function [model, history] = train(X, y, model, options)
+    % TRAIN - Train a neural network for Tic Tac Toe
     %
     % Syntax:
-    %   [model, history] = train_tictactoe(X, y, model, options)
+    %   [model, history] = train(X, y, model, options)
     %
     % Inputs:
-    %   X       - Training data matrix (samples x 9) - board states
-    %   y       - Target labels (samples x 9) - one-hot encoded moves
+    %   X       - Training data matrix (samples x features)
+    %   y       - Target labels (samples x classes, one-hot encoded)
     %   model   - Neural network model structure
     %   options - Training options structure with fields:
     %             .num_epochs (number of training epochs)
@@ -18,15 +18,16 @@ function [model, history] = train_tictactoe(X, y, model, options)
     %   model   - Trained model
     %   history - Training history with loss and accuracy
     %
-    % See also: NEURAL_NETWORK, PREDICT_TICTACTOE
+    % See also: NEURAL_NETWORK, PREDICT
     
-    % Add paths - get function directory
-    func_dir = fileparts(mfilename('fullpath'));
-    addpath(fullfile(func_dir, 'src'));
+    % Add paths
+    if ~exist('neural_network_forward', 'file')
+        addpath(fullfile(fileparts(mfilename('fullpath'))));
+    end
     
     % Validate inputs
     if nargin < 4
-        error('train_tictactoe:NotEnoughInputs', ...
+        error('train:NotEnoughInputs', ...
             'Requires 4 inputs: X, y, model, options');
     end
     

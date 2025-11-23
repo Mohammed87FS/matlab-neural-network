@@ -1,18 +1,27 @@
-function board_flat = board_to_vector(board, player)
-    % BOARD_TO_VECTOR - Convert board to input vector for neural network
-    % Returns: 9-element vector where:
-    %   1 = current player's piece
-    %   -1 = opponent's piece
-    %   0 = empty
+function vector = board_to_vector(board)
+    % BOARD_TO_VECTOR - Convert 3x3 board matrix to feature vector
+    %
+    % Syntax:
+    %   vector = board_to_vector(board)
     %
     % Inputs:
-    %   board  - 3x3 board matrix
-    %   player - Current player (1 for X, -1 for O)
+    %   board - 3x3 matrix where:
+    %           +1 = player 1 (X)
+    %           -1 = player 2 (O)
+    %            0 = empty
+    %
+    % Outputs:
+    %   vector - 9x1 feature vector (flattened board)
+    %
+    % Examples:
+    %   board = [1 0 -1; 0 1 0; -1 0 0];
+    %   vec = board_to_vector(board);
     
-    board_flat = board(:)';
+    if ~isequal(size(board), [3, 3])
+        error('board_to_vector:InvalidSize', 'Board must be a 3x3 matrix');
+    end
     
-    % Normalize: multiply by player to get perspective
-    % If player is O (-1), flip the board perspective
-    board_flat = board_flat * player;
+    % Flatten the board to a column vector
+    vector = board(:);
 end
 

@@ -7,18 +7,14 @@ function gradients = neural_network_backward(model, X, y, predictions, cache)
     % Inputs:
     %   model       - Neural network model structure
     %   X           - Input data (features x samples)
-    %   y           - True target labels (output_size x samples, one-hot encoded)
+    %   y           - True labels (output_size x samples, one-hot encoded)
     %   predictions - Network predictions from forward pass
     %   cache       - Cached values from forward pass
     %
     % Outputs:
     %   gradients - Cell array of gradient structures
     %
-    % Notes:
-    %   Uses cross-entropy loss with softmax
-    %   For softmax + cross-entropy: dL/dZ = predictions - targets
-    %
-    % See also: NEURAL_NETWORK_FORWARD, TRAIN_TICTACTOE
+    % See also: NEURAL_NETWORK_FORWARD, TRAIN
     
     % Validate inputs
     if ~isstruct(model) || ~isfield(model, 'layers')

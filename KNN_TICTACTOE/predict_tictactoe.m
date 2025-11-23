@@ -1,50 +1,60 @@
-function predictions = predict_tictactoe(model, input_data)
-    % PREDICT_TICTACTOE - Make predictions using a trained neural network
+function [i, j] = predict_tictactoe(model, board)
+    % PREDICT_TICTACTOE - Predict the best move for a given board state
     %
     % Syntax:
-    %   predictions = predict_tictactoe(model, input_data)
+    %   [i, j] = predict_tictactoe(model, board)
     %
     % Inputs:
-    %   model      - Trained neural network model structure
-    %   input_data - Input data matrix (samples x 9) - board states
+    %   model - Trained neural network model
+    %   board - 3x3 matrix representing the current board state
     %
     % Outputs:
-    %   predictions - Predicted move probabilities (samples x 9)
-    %                 Each row sums to 1 (softmax output)
+    %   i, j  - Row and column indices for the predicted move
     %
-    % See also: NEURAL_NETWORK, TRAIN_TICTACTOE
+    % The function selects the move with highest probability among valid moves
     
-    % Add paths - get function directory
-    func_dir = fileparts(mfilename('fullpath'));
-    addpath(fullfile(func_dir, 'src'));
-    
-    % Validate inputs
-    if ~isstruct(model) || ~isfield(model, 'layers')
-        error('predict_tictactoe:InvalidModel', 'Model must be a valid trained neural network structure');
+    % Add paths
+    if ~exist('board_to_vector', 'file')
+        addpath(fullfile(fileparts(mfilename('fullpath')), 'utils'));
+    end
+    if ~exist('get_valid_moves', 'file')
+        addpath(fullfile(fileparts(mfilename('fullpath')), 'utils'));
+    end
+    if ~exist('predict', 'file')
+        addpath(fullfile(fileparts(mfilename('fullpath')), 'src'));
     end
     
-    if ~isnumeric(input_data) || isempty(input_data)
-        error('predict_tictactoe:InvalidInput', 'Input data must be a non-empty numeric matrix');
+    % Convert board to feature vector
+    board_vec = board_to_vector(board);
+    
+    % Get predictions
+    predictions = predict(model, board_vec');
+    
+    % Get valid moves
+    [valid_rows, valid_cols] = get_valid_moves(board);
+    
+    if isempty(valid_rows)
+        i = [];
+        j = [];
+        return
     end
     
-    % Check feature dimension matches model input
-    expected_features = size(model.layers{1}.weights, 2);
-    if size(input_data, 2) ~= expected_features
-        error('predict_tictactoe:DimensionMismatch', ...
-            'Input data has %d features, but model expects %d features', ...
-            size(input_data, 2), expected_features);
+    % Convert valid moves to linear indices
+    valid_indices = (valid_rows - 1) * 3 + valid_cols;
+    
+    % Get probabilities for valid moves only
+    % predictions is (1 x 9) for a single sample
+    if size(predictions, 1) == 1
+        valid_probs = predictions(valid_indices);
+    else
+        valid_probs = predictions(1, valid_indices);
     end
     
-    % Forward pass through the network
-    layer_outputs = input_data';  % Transpose to features x samples
+    % Find the move with highest probability
+    [~, best_idx] = max(valid_probs);
     
-    for i = 1:length(model.layers)
-        layer = model.layers{i};
-        layer_outputs = layer.activation_function(layer.weights * layer_outputs + layer.biases);
-    end
-    
-    % Return the final output as predictions, transposed back to samples x classes
-    predictions = layer_outputs';
+    % Convert back to (i, j) coordinates
+    i = valid_rows(best_idx);
+    j = valid_cols(best_idx);
 end
-
 

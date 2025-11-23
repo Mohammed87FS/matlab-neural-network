@@ -1,171 +1,83 @@
-% TRAIN_TICTACTOE_MODEL - Train neural network on Tic Tac Toe
+% TRAIN_TICTACTOE_MODEL - Main script to train a neural network for Tic Tac Toe
 %
-% This script trains a neural network to play Tic Tac Toe using training
-% data generated from Cleve Moler's move generator.
+% This script:
+%   1. Generates training data using Cleve Moler's move generator
+%   2. Creates and trains a neural network
+%   3. Saves the trained model
 %
-% See also: NEURAL_NETWORK, TRAIN_TICTACTOE, GENERATE_TRAINING_DATA
+% Usage:
+%   train_tictactoe_model
 
-clear; clc; close all;
+% Add paths
+addpath(fullfile(fileparts(mfilename('fullpath')), 'utils'));
+addpath(fullfile(fileparts(mfilename('fullpath')), 'src'));
+addpath(fullfile(fileparts(mfilename('fullpath')), '..', 'NN_Car_Prices', 'src', 'utils'));
 
-fprintf('=========================================\n');
-fprintf('Tic Tac Toe Neural Network Training\n');
-fprintf('=========================================\n\n');
+% Configuration
+num_training_games = 5000;  % Number of games to generate for training
+hidden_layer_size = 128;     % Number of neurons in hidden layer
+num_epochs = 50;
+learning_rate = 0.01;
+batch_size = 32;
+verbose_interval = 5;  % Print progress every N epochs
 
-% Add paths - get script directory
-script_dir = fileparts(mfilename('fullpath'));
-addpath(fullfile(script_dir, 'src'));
-addpath(fullfile(script_dir, 'utils'));
+fprintf('=== Training Tic Tac Toe Neural Network ===\n\n');
 
-%% 1. Generate Training Data
-fprintf('1. Generating training data...\n');
+% Step 1: Generate training data
+fprintf('Step 1: Generating training data...\n');
+[X_train, y_train] = generate_training_data(num_training_games, true);
 
-num_games = 10000;  % Number of games to generate
-move_generator_strategy = 'optimal';  % Use optimal strategy from Cleve Moler
+% Step 2: Create neural network model
+fprintf('\nStep 2: Creating neural network model...\n');
+fprintf('  Input size: %d (board state)\n', size(X_train, 2));
+fprintf('  Hidden layer size: %d\n', hidden_layer_size);
+fprintf('  Output size: %d (possible moves)\n', size(y_train, 2));
 
-[X, y] = generate_training_data(num_games, move_generator_strategy);
+model = neural_network(size(X_train, 2), hidden_layer_size, size(y_train, 2));
 
-fprintf('   Training samples: %d\n', size(X, 1));
-fprintf('   Features per sample: %d\n', size(X, 2));
-fprintf('   Output classes: %d\n\n', size(y, 2));
+% Step 3: Set training options
+fprintf('\nStep 3: Setting training options...\n');
+options = struct();
+options.num_epochs = num_epochs;
+options.learning_rate = learning_rate;
+options.batch_size = batch_size;
+options.verbose = verbose_interval;
 
-%% 2. Split Data
-fprintf('2. Splitting data (80%% train, 20%% test)...\n');
+fprintf('  Epochs: %d\n', options.num_epochs);
+fprintf('  Learning rate: %.4f\n', options.learning_rate);
+fprintf('  Batch size: %d\n', options.batch_size);
 
-% Shuffle data
-idx = randperm(size(X, 1));
-X_shuffled = X(idx, :);
-y_shuffled = y(idx, :);
+% Step 4: Train the model
+fprintf('\nStep 4: Training the model...\n');
+[model, history] = train(X_train, y_train, model, options);
 
-% Split
-split_idx = floor(0.8 * size(X, 1));
-X_train = X_shuffled(1:split_idx, :);
-y_train = y_shuffled(1:split_idx, :);
-X_test = X_shuffled(split_idx+1:end, :);
-y_test = y_shuffled(split_idx+1:end, :);
+% Step 5: Save the model
+fprintf('\nStep 5: Saving the model...\n');
+if ~exist('models', 'dir')
+    mkdir('models');
+end
 
-fprintf('   Training: %d samples\n', size(X_train, 1));
-fprintf('   Test: %d samples\n\n', size(X_test, 1));
+save('models/tictactoe_model.mat', 'model', 'history', 'options');
+fprintf('  Model saved to: models/tictactoe_model.mat\n');
 
-%% 3. Initialize Neural Network
-fprintf('3. Initializing neural network...\n');
-
-input_size = 9;   % 9 board positions
-hidden_size = 64;  % Hidden layer neurons
-output_size = 9;   % 9 possible moves
-
-model = neural_network(input_size, hidden_size, output_size, ...
-    'activation', 'relu', ...
-    'output_activation', 'softmax');
-
-fprintf('   Architecture: %d -> %d -> %d\n', input_size, hidden_size, output_size);
-fprintf('   Activation: ReLU (hidden), Softmax (output)\n\n');
-
-%% 4. Train Model
-fprintf('4. Training model...\n\n');
-
-options.num_epochs = 100;
-options.learning_rate = 0.01;
-options.batch_size = 32;
-options.verbose = 10;  % Print every 10 epochs
-
-[model, history] = train_tictactoe(X_train, y_train, model, options);
-
-fprintf('\n   Training completed!\n\n');
-
-%% 5. Evaluate Model
-fprintf('5. Evaluating model...\n');
-
-predictions = predict_tictactoe(model, X_test);
-
-% Compute accuracy
-[~, predicted_classes] = max(predictions, [], 2);
-[~, true_classes] = max(y_test, [], 2);
-accuracy = mean(predicted_classes == true_classes);
-
-fprintf('\n   === Test Performance ===\n');
-fprintf('   Accuracy: %.2f%%\n\n', accuracy * 100);
-
-%% 6. Visualize Training History
-fprintf('6. Visualizing training history...\n');
-
-figure('Position', [100, 100, 1200, 400]);
-
-% Loss
-subplot(1, 2, 1);
-plot(history.loss, 'LineWidth', 2);
+% Step 6: Plot training history
+fprintf('\nStep 6: Plotting training history...\n');
+figure;
+subplot(2, 1, 1);
+plot(1:num_epochs, history.loss);
 xlabel('Epoch');
 ylabel('Loss');
 title('Training Loss');
 grid on;
 
-% Accuracy
-subplot(1, 2, 2);
-plot(history.accuracy * 100, 'LineWidth', 2);
+subplot(2, 1, 2);
+plot(1:num_epochs, history.accuracy);
 xlabel('Epoch');
-ylabel('Accuracy (%)');
+ylabel('Accuracy');
 title('Training Accuracy');
 grid on;
 
-fprintf('   ✓ Plots generated\n\n');
-
-%% 7. Save Model
-fprintf('7. Saving model...\n');
-
-if ~exist('models', 'dir')
-    mkdir('models');
-end
-
-save('models/tictactoe_model.mat', 'model', 'history', 'accuracy');
-fprintf('   ✓ Model saved to: models/tictactoe_model.mat\n\n');
-
-%% 8. Test Game Play
-fprintf('8. Testing game play...\n');
-
-% Play a test game
-board = zeros(3, 3);
-current_player = 1;
-
-fprintf('\n   Test game (NN plays as X):\n');
-display_board(board);
-
-for turn = 1:9
-    valid_moves = get_valid_moves(board);
-    if isempty(valid_moves)
-        break;
-    end
-    
-    if current_player == 1
-        % Neural network plays
-        move = get_best_move(model, board, current_player);
-        fprintf('   NN plays move %d\n', move);
-    else
-        % Opponent uses move generator
-        move = move_generator(board, current_player, 'optimal');
-        fprintf('   Opponent plays move %d\n', move);
-    end
-    
-    [board, winner, game_over] = tictactoe_game(board, move, current_player);
-    display_board(board);
-    
-    if game_over
-        if winner == 1
-            fprintf('   NN wins!\n');
-        elseif winner == -1
-            fprintf('   Opponent wins!\n');
-        else
-            fprintf('   Draw!\n');
-        end
-        break;
-    end
-    
-    current_player = -current_player;
-end
-
-fprintf('\n=========================================\n');
-fprintf('Training complete! ✓\n');
-fprintf('=========================================\n\n');
-
-fprintf('To play a game:\n');
-fprintf('  load(''models/tictactoe_model.mat'', ''model'');\n');
-fprintf('  play_tictactoe(model);\n\n');
+fprintf('\n=== Training Complete ===\n');
+fprintf('Final Loss: %.4f\n', history.loss(end));
+fprintf('Final Accuracy: %.2f%%\n', history.accuracy(end) * 100);
 

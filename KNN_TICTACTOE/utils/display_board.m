@@ -1,5 +1,15 @@
 function display_board(board)
-    % DISPLAY_BOARD - Display the board in a readable format
+    % DISPLAY_BOARD - Display the Tic Tac Toe board in a readable format
+    %
+    % Syntax:
+    %   display_board(board)
+    %
+    % Inputs:
+    %   board - 3x3 matrix where:
+    %           +1 = player 1 (X)
+    %           -1 = player 2 (O)
+    %            0 = empty
+    
     fprintf('\n');
     for i = 1:3
         for j = 1:3
@@ -10,6 +20,7 @@ function display_board(board)
             else
                 fprintf(' . ');
             end
+            
             if j < 3
                 fprintf('|');
             end

@@ -12,7 +12,7 @@ function [predictions, cache] = neural_network_forward(model, X)
     %   predictions - Network output (output_size x samples)
     %   cache       - Cell array storing intermediate values for backpropagation
     %
-    % See also: NEURAL_NETWORK_BACKWARD, TRAIN_TICTACTOE
+    % See also: NEURAL_NETWORK_BACKWARD, TRAIN
     
     % Validate inputs
     if ~isstruct(model) || ~isfield(model, 'layers')
