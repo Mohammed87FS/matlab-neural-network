@@ -5,7 +5,7 @@ A production-ready neural network implementation in MATLAB for predicting car pr
 [![MATLAB](https://img.shields.io/badge/MATLAB-R2019b+-orange.svg)](https://www.mathworks.com/products/matlab.html)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-## 🎯 Overview
+## Overview
 
 This project implements a neural network from scratch to predict car prices based on:
 - **Kilometers driven**
@@ -16,7 +16,7 @@ This project implements a neural network from scratch to predict car prices base
 - **Engine capacity** (CC)
 - **Number of seats**
 
-## ⚡ Quick Start
+## Quick Start
 
 ```matlab
 % Train the model
@@ -31,19 +31,19 @@ train_car_price_model
 % 6. Save the trained model
 ```
 
-## 📋 Requirements
+##  Requirements
 
 - MATLAB R2019b or later
 - No additional toolboxes required!
 
-## 🚀 Installation
+##  Installation
 
 ```bash
 git clone https://github.com/yourusername/matlab-neural-network.git
 cd matlab-neural-network
 ```
 
-## 📊 Dataset
+##  Dataset
 
 **File:** `data/car_price.csv`
 
@@ -57,7 +57,7 @@ Real-world car pricing data with features:
 - Engine capacity
 - Seating capacity
 
-## 🏗️ Project Structure
+##  Project Structure
 
 ```
 matlab-neural-network/
@@ -84,7 +84,7 @@ matlab-neural-network/
 └── README.md
 ```
 
-## 🎓 How It Works
+##  How It Works
 
 ### 1. Data Preprocessing
 - Extracts numeric features from text fields
@@ -113,7 +113,7 @@ Output Layer (1 neuron, Linear activation)
 - **RMSE** (Root Mean Squared Error) - Penalizes large errors
 - **MAPE** (Mean Absolute Percentage Error) - Error as percentage
 
-## 📖 API Reference
+## API Reference
 
 ### Training
 
@@ -164,7 +164,7 @@ plot_metrics('history', history, 'type', 'regression');
 plot_metrics('regression_results', y_actual, y_predicted);
 ```
 
-## 📈 Expected Performance
+## Expected Performance
 
 Typical results on the car price dataset:
 - **MAE:** ~2-3 Lakhs
@@ -204,7 +204,7 @@ Edit the `preprocess_car_data` function in `train_car_price_model.m` to:
 - Remove features
 - Change encoding methods
 
-## 🧩 Core Features
+##  Core Features
 
 ### Activation Functions
 - ReLU, Leaky ReLU
@@ -228,7 +228,7 @@ Edit the `preprocess_car_data` function in `train_car_price_model.m` to:
 - Regression: MSE, RMSE, MAE, R², MAPE
 - Classification: Accuracy, Precision, Recall, F1-Score, Confusion Matrix
 
-## 🎯 Use Cases
+##  Use Cases
 
 This implementation can be adapted for:
 1. **Regression Tasks**
@@ -241,30 +241,10 @@ This implementation can be adapted for:
    - Multi-class classification
    - Pattern recognition
 
-## 🤝 Contributing
+##  Contributing
 
 Contributions are welcome! Please:
 1. Fork the repository
 2. Create a feature branch
 3. Make your changes
 4. Submit a pull request
-
-## 📝 License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
-
-## 🙏 Acknowledgments
-
-- Built for educational purposes
-- Demonstrates neural network fundamentals
-- No external dependencies
-
-## 📬 Contact
-
-For questions or issues:
-- Open an issue on GitHub
-- Email: your.email@example.com
-
----
-
-**Note:** This is an educational implementation built from scratch. For production deep learning, consider MATLAB's Deep Learning Toolbox.
